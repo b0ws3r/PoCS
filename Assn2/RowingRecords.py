@@ -3,9 +3,9 @@ import pandas as pd  # To read data
 from sklearn.linear_model import LinearRegression
 import numpy
 
-def GetLogLinearRegression(dataset):
-    X = dataset['N'].values  # values converts it into a numpy array
-    Y = dataset['Speed'].values
+def GetLogLinearRegression(dataset, x,y):
+    X = dataset[x].values  # values converts it into a numpy array
+    Y = dataset[y].values
     FX = numpy.zeros(len(X))
     FY = numpy.zeros(len(Y))
     for idx, x in enumerate(X):
