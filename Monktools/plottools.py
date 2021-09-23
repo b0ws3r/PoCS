@@ -1,9 +1,18 @@
 import matplotlib.pyplot as plt  # To visualize
 
 
-def plot_results(datas_and_fits, xlabel, ylabel, title, plot_fit):
+def plot_results(datas_and_fits, xlabel, ylabel, title):
     plt.scatter(datas_and_fits[xlabel], datas_and_fits[ylabel])
-    if plot_fit: plt.plot(datas_and_fits[0], datas_and_fits[2], color='red')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.savefig('Plots/' + title + '.jpg')
+    plt.close()
+
+
+def plot_results_with_fit(datas_and_fits, xlabel, ylabel, title, y_pred):
+    plt.scatter(datas_and_fits[xlabel], datas_and_fits[ylabel])
+    plt.plot(datas_and_fits[xlabel], y_pred, color='red')
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
