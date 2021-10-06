@@ -17,9 +17,6 @@ def innovate():
     return tuple(random.choice(levels) for _ in range(3))
 
 
-# We will see how many different types of elephants reproduce w/ diff colors
-
-
 elephant_groups = [ElephantGroup()]  # initialize with one elephant of random color
 
 # rho close to 0 means a lot of elephants of the same color
@@ -27,7 +24,7 @@ elephant_groups = [ElephantGroup()]  # initialize with one elephant of random co
 rho = .1
 
 # maximum steps to run simulation
-t_max = 20
+t_max = 27
 
 
 def perform_innovation():
@@ -36,6 +33,13 @@ def perform_innovation():
         return True
     else:
         return False
+
+
+def zipf(dataframe, yvalue, title):
+    dataframe['rank'] = dataframe[yvalue].rank(ascending=False)
+    loggified_df = statstools.get_logs_1axis(dataframe, 'rank')
+    plottools.plot_results(loggified_df, 'rank_log', yvalue + '_log', 'Zipf plot for' + title)
+    return loggified_df
 
 
 def replicate_elephants():
@@ -50,24 +54,34 @@ def replicate_elephants():
                 elephant_group.size += 1
 
 
-for i in range(t_max):
-    replicate_elephants()
-    print(i)
+for rc in [.1, 0.01, 0.001]:
+    elephant_groups = [ElephantGroup()]
+    rho = rc
 
-print(f"Number of groups of elephants: {len(elephant_groups)}")
+    runs = []
+    for i in range(t_max):
+        replicate_elephants()
+        print(i)
+    runs.append(elephant_groups.copy())
+    print(f"Number of groups of elephants: {len(elephant_groups)}")
 
-size_1_elephant_groups = list(filter(lambda group: group.size == 1, elephant_groups))
-print(f"Number of groups of elephants of size 1: {len(size_1_elephant_groups)}")
+    size_1_elephant_groups = list(filter(lambda group: group.size == 1, elephant_groups))
+    print(f"Number of groups of elephants of size 1: {len(size_1_elephant_groups)}")
 
-# get list of elephant group sizes
-groups_of_size_k = list(map(lambda g: g.size, elephant_groups))
-groups_of_size_k = list(filter(lambda g: g > 0 , groups_of_size_k))
-raw = pd.DataFrame(groups_of_size_k, columns=['k'])
-n_k = raw['k'].value_counts(sort=True)
-n_k = n_k.rename_axis('k').reset_index(name='N')
+    # get list of elephant group sizes
+    groups_of_size_k = list(map(lambda g: g.size, elephant_groups))
+    groups_of_size_k = list(filter(lambda g: g > 0 , groups_of_size_k))
+    raw = pd.DataFrame(groups_of_size_k, columns=['k'])
+    n_k = raw['k'].value_counts(sort=True)
+    n_k = n_k.rename_axis('k').reset_index(name='N')
 
-fig, ax = plt.subplots()
-statstools.plot_zipf(ax, list(n_k['N']), 'C0', 'Elephants')
+    # get zipf and return data
+    fig, ax = plt.subplots()
+    x_vals, log_nk = statstools.plot_zipf(ax, list(n_k['N']), 'C0', 'Elephants')
 
-plt.show()
+    # plot the fit and get the slope back
+    slope, intercept, r, p, stderr = statstools.plot_fit(ax, x_vals, log_nk, 0, 3, 'lime')
+    print(slope)
+    plt.savefig(f"Plots/richgetricher_simulation_alpha{slope}_tmax{t_max}_rho{rho}.jpg")
+    plt.show()
 
