@@ -65,8 +65,6 @@ groups_of_size_k = list(filter(lambda g: g > 0 , groups_of_size_k))
 raw = pd.DataFrame(groups_of_size_k, columns=['k'])
 n_k = raw['k'].value_counts(sort=True)
 n_k = n_k.rename_axis('k').reset_index(name='N')
-statstools.get_logs_1axis(n_k, 'k')
-zipf(n_k, 'k', 'elephants')
 
 fig, ax = plt.subplots()
 statstools.plot_zipf(ax, list(n_k['N']), 'C0', 'Elephants')
