@@ -82,6 +82,7 @@ for rc in [.1, 0.01, 0.001]:
     # plot the fit and get the slope back
     slope, intercept, r, p, stderr = statstools.plot_fit(ax, x_vals, log_nk, 0, 3, 'lime')
     print(slope)
+    plt.legend([f"line with alpha = {slope}", "Zipf distribution"], shadow=True)
     plt.savefig(f"Plots/richgetricher_simulation_alpha{slope}_tmax{t_max}_rho{rho}.jpg")
     plt.show()
 
