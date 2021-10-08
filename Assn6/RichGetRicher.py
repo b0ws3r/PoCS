@@ -1,3 +1,4 @@
+from datetime import datetime
 import random
 
 import matplotlib.pyplot as plt
@@ -54,10 +55,12 @@ def replicate_elephants():
                 elephant_group.size += 1
 
 
+now = datetime.now()
+print(f"Start: {now}")
 rho_vals = [.1, 0.01, 0.001]
 for rc in range(len(rho_vals)):
     averaged_group = []
-    for i in range(10):
+    for i in range(20):
         elephant_groups = [ElephantGroup()]
         rho = rho_vals[rc]
 
@@ -83,7 +86,7 @@ for rc in range(len(rho_vals)):
     x_vals, log_nk = ranktools.plot_zipf(ax, list(n_k['N']), 'C0', 'Elephants')
 
     # plot the fit and get the slope back
-    linear_fit_params = [[1.5, 2.2], [1.4, 2.8], [1.05, 2]]
+    linear_fit_params = [[1.5, 3.5], [1.4, 3.5], [1.05, 3]]
     slope, intercept, r, p, stderr = plottools.plot_fit(ax,
                                                         x_vals,
                                                         log_nk,
@@ -93,5 +96,7 @@ for rc in range(len(rho_vals)):
     print(slope)
     plt.legend([f"line with alpha = {slope}", "Zipf distribution"], shadow=True)
     plt.savefig(f"Plots/richgetricher_simulation_alpha{slope}_tmax{t_max}_rho{rho}.jpg")
-    plt.show()
+    # plt.show()
 
+now = datetime.now()
+print(f"Start: {now}")
