@@ -18,7 +18,7 @@ def read_book(path):
     return words_in_book
 
 
-def Q_6(words_in_book):
+def q_6(words_in_book):
     df = pd.DataFrame(words_in_book, columns=["word"])
     words_with_freqs = ranktools.group_data(df, 'word', 'k')
     n_k = ranktools.group_data(words_with_freqs, 'k', 'N')
@@ -34,12 +34,13 @@ def Q_6(words_in_book):
     latex = df.to_latex()
     print(latex)
 
+
 # get the words out of pride and prejudice
 words_in_book = read_book("Data/prideandprejudice.txt")
-Q_6(words_in_book)
+q_6(words_in_book)
 
 # get the words out of pride and prejudice
 words_in_book = read_book("Data/comtedemontecristo.txt")
-Q_6(words_in_book)
+q_6(words_in_book)
 
 

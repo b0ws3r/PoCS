@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from Monktools import statstools, plottools
+from Monktools import statstools, plottools, ranktools
 
 
 class ElephantGroup:
@@ -54,22 +54,25 @@ def replicate_elephants():
                 elephant_group.size += 1
 
 
-for rc in [.1, 0.01, 0.001]:
-    elephant_groups = [ElephantGroup()]
-    rho = rc
+rho_vals = [.1, 0.01, 0.001]
+for rc in range(len(rho_vals)):
+    averaged_group = []
+    for i in range(10):
+        elephant_groups = [ElephantGroup()]
+        rho = rho_vals[rc]
 
-    runs = []
-    for i in range(t_max):
-        replicate_elephants()
-        print(i)
-    runs.append(elephant_groups.copy())
-    print(f"Number of groups of elephants: {len(elephant_groups)}")
+        for j in range(t_max):
+            replicate_elephants()
+            # print(j)
+        averaged_group = averaged_group + (elephant_groups.copy())
+        print(f"Number of groups of elephants: {len(elephant_groups)}")
 
-    size_1_elephant_groups = list(filter(lambda group: group.size == 1, elephant_groups))
+    print(f"Number of groups of elephants - 10 runs: {len(averaged_group)}")
+    size_1_elephant_groups = list(filter(lambda group: group.size == 1, averaged_group))
     print(f"Number of groups of elephants of size 1: {len(size_1_elephant_groups)}")
 
     # get list of elephant group sizes
-    groups_of_size_k = list(map(lambda g: g.size, elephant_groups))
+    groups_of_size_k = list(map(lambda g: g.size, averaged_group))
     groups_of_size_k = list(filter(lambda g: g > 0 , groups_of_size_k))
     raw = pd.DataFrame(groups_of_size_k, columns=['k'])
     n_k = raw['k'].value_counts(sort=True)
@@ -77,10 +80,16 @@ for rc in [.1, 0.01, 0.001]:
 
     # get zipf and return data
     fig, ax = plt.subplots()
-    x_vals, log_nk = statstools.plot_zipf(ax, list(n_k['N']), 'C0', 'Elephants')
+    x_vals, log_nk = ranktools.plot_zipf(ax, list(n_k['N']), 'C0', 'Elephants')
 
     # plot the fit and get the slope back
-    slope, intercept, r, p, stderr = statstools.plot_fit(ax, x_vals, log_nk, 0, 3, 'lime')
+    linear_fit_params = [[1.5, 2.2], [1.4, 2.8], [1.05, 2]]
+    slope, intercept, r, p, stderr = plottools.plot_fit(ax,
+                                                        x_vals,
+                                                        log_nk,
+                                                        linear_fit_params[rc][0],
+                                                        linear_fit_params[rc][1],
+                                                        'lime')
     print(slope)
     plt.legend([f"line with alpha = {slope}", "Zipf distribution"], shadow=True)
     plt.savefig(f"Plots/richgetricher_simulation_alpha{slope}_tmax{t_max}_rho{rho}.jpg")
