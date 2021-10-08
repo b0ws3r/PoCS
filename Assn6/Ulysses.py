@@ -1,29 +1,23 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from Monktools import statstools, plottools
-
-
-def group_data(dataframe, column):
-    k_n = dataframe[column].value_counts(sort=True)
-    k_n = k_n.rename_axis('k').reset_index(name='N')
-    return k_n
-# We will see how many different types of elephants reproduce w/ diff colors
-
+from Monktools import statstools, plottools, ranktools
 
 data = pd.read_csv('Data/ulysses.txt', sep=": ", engine='python')
-n_k = group_data(data, 'k')
+n_k = ranktools.group_data(data, 'k', 'N')
 
-# get zipf and return data
-fig, ax = plt.subplots()
-x_vals, log_nk = statstools.plot_zipf(ax, list(n_k['N']), 'C0', 'Elephants')
+# calculate rho_est:
+# rho_est = (# of unique words)/(# of all words)
+rho_est = ranktools.get_simon_rho_estimate(n_k)
 
-# plot the fit and get the slope back
-slope, intercept, r, p, stderr = statstools.plot_fit(ax, x_vals, log_nk, 1.498,1.647, 'lime')
-print(slope)
-plt.title("Ulysses Zipf distribution")
-plt.legend([f"line with alpha = {slope}", "Zipf distribution"], shadow=True)
-plt.show()
-plt.savefig(f"Plots/ulysses{slope}.jpg")
+# num groups of size 1
+print(f"Theoretical Fraction of Groups of size 1: {ranktools.n_1(rho_est)}")
+print(f"Empirical Fraction of Groups of size 1: {ranktools.get_fraction_of_groups_of_size_n(n_k, 1)}")
+# num groups of size 2
+print(f"Theoretical Fraction of Groups of size 2: {ranktools.n_2(rho_est)}")
+print(f"Empirical Fraction of Groups of size 2: {ranktools.get_fraction_of_groups_of_size_n(n_k, 2)}")
+# num groups of size 3
+print(f"Theoretical Fraction of Groups of size 3: {ranktools.n_3(rho_est)}")
+print(f"Empirical Fraction of Groups of size 3: {ranktools.get_fraction_of_groups_of_size_n(n_k, 3)}")
 
 
 

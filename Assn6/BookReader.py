@@ -1,36 +1,45 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from Monktools import statstools, plottools
+from Monktools import statstools, plottools, ranktools
 
-def clean_and_collect_words(line):
-    words = line.split(" ")
+
+def clean_and_collect_words(line_of_text):
+    words = line_of_text.split(" ")
     words = list(map(lambda w: w.strip().strip("\"").strip(), words))
     return words
 
 
-aggwords = []
-with open("Data/prideandprejudice.txt") as infile:
-    for line in infile:
-        aggwords = aggwords + clean_and_collect_words(line)
+def read_book(path):
+    words_in_book = []
+    with open(path) as infile:
+        for line in infile:
+            words_in_book = words_in_book + clean_and_collect_words(line)
+    return words_in_book
 
 
-df = pd.DataFrame(aggwords, columns=["word"])
-kNamesAppearingNTimes = df['word'].value_counts(sort=True)
-raw_freq = kNamesAppearingNTimes.rename_axis('word').reset_index(name='freq')
+def Q_6(words_in_book):
+    df = pd.DataFrame(words_in_book, columns=["word"])
+    words_with_freqs = ranktools.group_data(df, 'word', 'k')
+    n_k = ranktools.group_data(words_with_freqs, 'k', 'N')
 
-kNamesAppearingNTimes = raw_freq['freq'].value_counts(sort=True)
-n_k = kNamesAppearingNTimes.rename_axis('freq').reset_index(name='N')
+    rho_est = ranktools.get_simon_rho_estimate(n_k)
 
-# get zipf and return data
-fig, ax = plt.subplots()
-x_vals, log_nk = statstools.plot_zipf(ax, list(n_k['N']), 'C0', 'Elephants')
+    # num groups of size 1
+    k1 = [1, ranktools.n_1(rho_est), ranktools.get_fraction_of_groups_of_size_n(n_k, 1)]
+    k2 = [2, ranktools.n_2(rho_est), ranktools.get_fraction_of_groups_of_size_n(n_k, 2)]
+    k3 = [3, ranktools.n_3(rho_est), ranktools.get_fraction_of_groups_of_size_n(n_k, 3)]
+    table = [k1, k2, k3]
+    df = pd.DataFrame(table, columns=['k', 'theory', 'empirical'])
+    latex = df.to_latex()
+    print(latex)
 
-# plot the fit and get the slope back
-slope, intercept, r, p, stderr = statstools.plot_fit(ax, x_vals, log_nk, 0.7, 1.4, 'lime')
-print(slope)
-plt.legend([f"line with alpha = {slope}", "Zipf distribution"], shadow=True)
-plt.savefig(f"Plots/prideandprejudics{slope}.jpg")
-plt.show()
+# get the words out of pride and prejudice
+words_in_book = read_book("Data/prideandprejudice.txt")
+Q_6(words_in_book)
 
-print("wor")
+# get the words out of pride and prejudice
+words_in_book = read_book("Data/comtedemontecristo.txt")
+Q_6(words_in_book)
+
+
