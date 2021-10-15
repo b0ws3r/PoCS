@@ -14,10 +14,10 @@ def q_1_a():
     gamma = 5 / 2
     norm_constant = (gamma - 1) / (1 - 10_000_000 ** -(gamma - 1))
 
-    def P_k(k):
+    def p_k(k):
         return k ** (-gamma)
 
-    p_k_vals = [P_k(k) for k in range(1, 10_000_000 + 1)]
+    p_k_vals = [p_k(k) for k in range(1, 10_000_000 + 1)]
     bins = [x / norm_constant for x in p_k_vals]
 
     def filter_portions(boundary: float):
