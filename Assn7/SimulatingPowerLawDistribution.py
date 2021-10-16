@@ -19,16 +19,21 @@ def q_1_a():
 
     p_k_vals = [p_k(k) for k in range(1, 10_000_000 + 1)]
     bins = [x / norm_constant for x in p_k_vals]
+    cum_bins = numpy.zeros(len(bins))
+    for idx, _ in enumerate(bins):
+        cum_bins[idx] = np.sum(bins[0:idx])
 
     def filter_portions(boundary: float):
-        for idx, bin in enumerate(bins):
-            if boundary > bin:  # > bin or greater than sum(portions from 1 to bin)
-                return idx + 1
+        for idx, bin in enumerate(cum_bins):
+            if bin > boundary: # given boundary of .99, we want to see if
+                return idx+1
+        return len(bins)
 
     def get_power_law_k_value() -> int:
         boundary = np.random.rand()
         k = filter_portions(boundary)
         return k
+
 
     def get_max_values(samples: int, sample_size: int) -> List[int]:
         max_vals = list()
@@ -76,4 +81,3 @@ def q_1_b():
 
 
 q_1_a()
-q_1_b()
