@@ -1,3 +1,5 @@
+import math
+
 import matplotlib
 from typing import List
 import pickle
@@ -11,7 +13,7 @@ import numpy as np
 
 
 def q_1_a():
-    gamma = 5 / 2
+    gamma = 3 / 2
     norm_constant = (gamma - 1) / (1 - 10_000_000 ** -(gamma - 1))
 
     def p_k(k):
@@ -29,14 +31,15 @@ def q_1_a():
         if  boundary < cum_bins[0]: return 1
         out = numpy.where(boundary > cum_bins)
         return len(out)
-        for idx, bin in enumerate(cum_bins):
-            if bin > boundary: # given boundary of .99, we want to see if
-                return idx+1
-        return len(bins)
+        # for idx, bin in enumerate(cum_bins):
+        #     if bin > boundary: # given boundary of .99, we want to see if
+        #         return idx+1
+        # return len(bins)
 
     def get_power_law_k_value() -> int:
         boundary = np.random.rand()
-        k = filter_portions(boundary)
+        # k = filter_portions(boundary)
+        k=round(1/(1-boundary**2))
         return k
 
 
@@ -85,4 +88,5 @@ def q_1_b():
     plt.savefig(f"Plots/expected_k_max_fit.jpg")
 
 
-q_1_a()
+# q_1_a()
+q_1_b()
