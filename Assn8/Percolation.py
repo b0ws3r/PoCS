@@ -77,5 +77,5 @@ ax2.imshow(binary_img, cmap=plt.get_cmap(cm.bone), origin='lower')
 
 # Add label
 ax1.text(2, N1 + 5, f'Site percolation with probability {probability}', color='Orange', fontsize=18)
-ax2.text(2, N1 + 5, f'Largest cluster found', color='Orange', fontsize=18)
+ax2.text(2, N1 + 5, f'Largest cluster found of size {sizes.max()}', color='Orange', fontsize=18)
 plt.show()

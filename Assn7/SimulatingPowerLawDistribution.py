@@ -12,33 +12,17 @@ import numpy as np
 
 def q_1_a():
     gamma = 5 / 2
-    norm_constant = (gamma - 1) / (1 - 10_000_000 ** -(gamma - 1))
 
     def p_k(k):
         return k ** (-gamma)
 
-    p_k_vals = [p_k(k) for k in range(1, 10_000_000 + 1)]
-    bins = [x / norm_constant for x in p_k_vals]
-    cum_bins =numpy.zeros(len(bins))
-    total = 0
-    for idx, bin in enumerate(bins):
-        total += bin
-        cum_bins[idx] = total
-
-    def filter_portions(boundary: float):
-        if  boundary < cum_bins[0]: return 1
-        out = numpy.where(boundary > cum_bins)
-        return len(out)
-        for idx, bin in enumerate(cum_bins):
-            if bin > boundary: # given boundary of .99, we want to see if
-                return idx+1
-        return len(bins)
+    def get_k(r, gamma):
+        return round((1 - r) ** (-1 / (gamma - 1)))
 
     def get_power_law_k_value() -> int:
         boundary = np.random.rand()
-        k = filter_portions(boundary)
+        k = get_k(boundary, gamma)
         return k
-
 
     def get_max_values(samples: int, sample_size: int) -> List[int]:
         max_vals = list()
@@ -86,3 +70,4 @@ def q_1_b():
 
 
 q_1_a()
+q_1_b()
