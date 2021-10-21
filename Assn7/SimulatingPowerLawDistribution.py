@@ -13,9 +13,6 @@ import numpy as np
 def q_1_a():
     gamma = 5 / 2
 
-    def p_k(k):
-        return k ** (-gamma)
-
     def get_k(r, gamma):
         return round((1 - r) ** (-1 / (gamma - 1)))
 

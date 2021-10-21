@@ -31,25 +31,26 @@ def get_percolation_cluster_avg_size(probability, l):
 
 
 # Parameters
-l_vals = [20, 50, 100, 200, 500, 1000]  # square lattice of size L
-# l_vals = [20, 50, 100]  # square lattice of size L
-probabilities = np.linspace(0, 1, 100) # occupation probabilities to test
+def q_4():
+    l_vals = [20, 50, 100, 200, 500, 1000]  # square lattice of size L
+    # l_vals = [20, 50, 100]  # square lattice of size L
+    probabilities = np.linspace(0, 1, 100) # occupation probabilities to test
 
 
-for l in l_vals:
-    print(f"L = {l}")
-    prob_to_max_avg_cluster = []
-    for idx, p in enumerate(probabilities):
-        max_sum = 0
-        for i in range(100):  # run 100 tests for each probability
-            max_cluster_size = get_percolation_cluster_avg_size(p, l)[0]
-            max_sum += max_cluster_size
-        max_avg_cluster_size = max_sum/100
-        prob_to_max_avg_cluster.append(max_avg_cluster_size)
-    plt.plot(probabilities, prob_to_max_avg_cluster, label=f"L = {l}")
+    for l in l_vals:
+        print(f"L = {l}")
+        prob_to_max_avg_cluster = []
+        for idx, p in enumerate(probabilities):
+            max_sum = 0
+            for i in range(100):  # run 100 tests for each probability
+                max_cluster_size = get_percolation_cluster_avg_size(p, l)[0]
+                max_sum += max_cluster_size
+            max_avg_cluster_size = max_sum/100
+            prob_to_max_avg_cluster.append(max_avg_cluster_size/(l*l))
+        plt.plot(probabilities, prob_to_max_avg_cluster, label=f"L = {l}")
 
-plt.legend()
-plt.savefig(f"Plots/p_vs_s_avg_0_{max(l_vals)}")
+    plt.legend()
+    plt.savefig(f"Plots/p_vs_s_avg_0_{max(l_vals)}")
 
 
 def get_and_plot_cluster_size_dist(p, l):
@@ -61,14 +62,18 @@ def get_and_plot_cluster_size_dist(p, l):
     plt.clf()
     plt.scatter(dist["size"], dist["n_k"])
     plt.show()
-    plt.savefig(f"Plots/cluster_size_dist_probability_{p}_L_")
+    p_str = str(round(p,2)).replace(".","-")
+    plt.savefig(f"Plots/cluster_size_dist_probability_{p_str}_L_{l}")
 
 
-# q_6_a plot distribution of cluster sizes for large L and threshold p
+# get the fractional size of largest cluster as a function of p for various space sizes
+# q_4()
+
+# q_4 plot distribution of cluster sizes for large L and threshold p
 p_threshold = 0.592746
 get_and_plot_cluster_size_dist(p_threshold, 500)
 
-# q_6_b plot distribution of cluster sizes for large L and p values: [p_c/2, p_c + (1-p_c)/2]
+# q_5 plot distribution of cluster sizes for large L and p values: [p_c/2, p_c + (1-p_c)/2]
 get_and_plot_cluster_size_dist(p_threshold/2, 500)
 get_and_plot_cluster_size_dist(p_threshold + (1-p_threshold)/2, 500)
 
