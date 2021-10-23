@@ -60,8 +60,8 @@ def get_and_plot_cluster_size_dist(p, l):
     # x axis = forest size
     # y axis = num_clusters
     plt.clf()
-    plt.scatter(dist["size"], dist["n_k"])
-    plt.show()
+    plt.scatter(dist["size"], np.log10(dist["n_k"]))
+    # plt.show()
     p_str = str(round(p,2)).replace(".","-")
     plt.savefig(f"Plots/cluster_size_dist_probability_{p_str}_L_{l}")
 
