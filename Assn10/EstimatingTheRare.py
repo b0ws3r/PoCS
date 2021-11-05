@@ -15,7 +15,9 @@ path = 'Data/vocab_cs_mod.csv'
 dataframe = pd.read_csv(path)
 
 fig2, ax = plt.subplots()
-x_vals, log_nk = ranktools.plot_zipf(ax, list(dataframe['N']))
+# x_vals, log_nk = ranktools.plot_zipf(ax, list(dataframe['N']))
+ax.scatter(np.log10(list(dataframe['N'])), np.log10(list(dataframe['k'])))
+plottools.plot_fit(ax, np.log10(list(dataframe['N'])), np.log10(list(dataframe['k'])), 0.5, color='red')
 
 def n_greaterthan_k(k):
     n_gk = 3.46* (10**8) * k ** (-0.661)
@@ -42,8 +44,11 @@ for i in range(3, 200):
     print(n_k)
     df = df.append({'n': n_k, 'k':k}, ignore_index=True)
 
-ranktools.plot_zipf(ax, list(df['n']), color='red')
-plottools.plot_fit(ax, np.log10(list(df['n'])), np.log10(list(df['k'])), 200, )
+# ranktools.plot_zipf(ax, list(df['n']), color='red')
+ax.scatter(np.log10(list(df['n'])), np.log10(list(df['k'])))
+slope, intercept, r, p, stderr = plottools.plot_fit(ax, np.log10(list(df['n'])), np.log10(list(df['k'])), 5, 6.8, color='purple')
+ax.set_title("fit with")
+ax.legend()
 fig2.savefig(f"Plots/google_zipf.png")
 # fit for zipf alpha = 1/(gamma-1)
 # the problem gives us gamma = −0.661
