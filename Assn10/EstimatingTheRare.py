@@ -1,7 +1,4 @@
 import matplotlib
-from typing import List
-import pickle
-import numpy
 import pandas as pd
 from Monktools import plottools, ranktools
 
@@ -28,9 +25,8 @@ def n_greaterthan_k(k):
 n_twice = n_greaterthan_k(1)
 # this means that that for part c, we have at least
 known_num_words_to_200 = sum(list(dataframe['N']))
-num_199_to_2 = n_twice - known_num_words_to_200
-
 print(f'known words count {str(known_num_words_to_200)}')
+
 calc=0
 df = pd.DataFrame(columns=['n','k'])
 for i in range(3, 200):
@@ -40,8 +36,8 @@ for i in range(3, 200):
     # n_k = n_greaterthan_k(k-1) - (known_num_words_to_200 + calc)
     n_k = n_greaterthan_k(k - 1) - n_greaterthan_k(k + 1)
     calc= calc+n_k
-    print(k)
-    print(n_k)
+    # print(k)
+    # print(n_k)
     df = df.append({'n': n_k, 'k':k}, ignore_index=True)
     dataframe = dataframe.append({'N': n_k, 'k':k}, ignore_index=True)
 
@@ -65,17 +61,19 @@ fig3.savefig(f"Plots/google_word_hypothetical_combined_fit.png")
 
 # for now, estimate words that appear once as .001
 funny_guys = n_greaterthan_k(.0001) - n_greaterthan_k(1)
-total_words = n_greaterthan_k(.0001)
+total_words = (n_greaterthan_k(.0001)-n_greaterthan_k(199)) + known_num_words_to_200
 
 # (i)The hypothetical fraction of words that appear once out of all words
 # (think of words as organisms or tokens here),
-fraction_appearing_once = funny_guys/ (sum(list(dataframe['N'])) + funny_guys)
+fraction_appearing_once = funny_guys/ total_words
 print(f"fraction appearing once: {fraction_appearing_once}")
 
 # (ii) fraction_appearing_once = funny_guys/ (sum(list(dataframe['N'])) + funny_guys)
 total_unique = (sum(list(dataframe['N'] * dataframe['k'])) + funny_guys)
-print(f"total unique words: {total_unique}")
+print(f"total unique words in dataset: {total_unique}")
 
 # (iii) fraction missing
-(num_199_to_2 + funny_guys) / (sum(list(dataframe['N'])) + funny_guys)
+num_199_to_1 = (n_greaterthan_k(.001)- known_num_words_to_200)#n_greaterthan_k(199))
+print(f'num from 199 to 1: {num_199_to_1}')
+(num_199_to_1) / (sum(list(dataframe['N'])) + funny_guys)
 print(f"fraction missing: {total_unique}")
