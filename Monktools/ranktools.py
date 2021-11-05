@@ -40,7 +40,6 @@ def plot_zipf(ax: plt.Axes,
     # Then plot
     ax.set_xlabel("rank")
     ax.set_ylabel("k")
-    ax.set_title(label)
     ax.scatter(x_vals, log_nk, label=label, s=1, color=color)
     # Then return the lists we plotted, in case someone wants to fit a line
     return x_vals, log_nk

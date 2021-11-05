@@ -189,6 +189,8 @@ def last_part():
         if round(density,2) == 0.90:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
 
+    axz.legend()
+    axz.set_title("Cluster size for varying densities")
     figd.savefig(f"Plots/cluster_size_zipf_L2.png")
 
 
