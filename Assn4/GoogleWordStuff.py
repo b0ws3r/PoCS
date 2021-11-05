@@ -6,21 +6,27 @@ from Monktools import statstools, plottools
 import numpy
 
 
+def ccdf(df, y):
+    # PDF
+    df['pdf'] = df[y] / sum(df[y])
+
+    # CDF
+    df['cdf'] = df['pdf'].cumsum()
+    df = df.reset_index()
+    df['ccdf'] = numpy.ones(len(df['cdf'])) - df['cdf']
+    return df
+
+
 def Q1_Q2():
     ## QUESTION 1
     # Get data from CSV
     dataframe = statstools.get_dataframe('Data/vocab_cs_mod.csv')
 
-    ccdf = 0
-
     dataframe = dataframe.sort_values(by=['k'])
-    arr = numpy.zeros(len(dataframe['k']))
 
-    for idx, row in dataframe.iterrows():
-        ccdf += row['N'] # N_>k = sum_i_to_end of N_i
-        arr[idx] = ccdf
-
-    dataframe['ccdf'] = arr.tolist()
+    # dataframe['ccdf'] = arr.tolist()
+    # NEW CCDF attempt
+    dataframe = ccdf(dataframe, 'N')
 
     loggified_df = statstools.get_logs_2axes(dataframe, 'k', 'ccdf')
     plottools.plot_results(loggified_df, 'k_log', 'ccdf_log', 'CCDF of Word Frequencies')
@@ -83,22 +89,6 @@ def Q3_Q4_Q5():
 #################################################################################################
 ## QUESTION 6
 
-
-def ccdf(dataframe, x, y, title):
-
-    ccdf = 0
-    arr = numpy.zeros(len(dataframe[x]))
-
-    for idx, row in dataframe.iterrows():
-        ccdf += row[y] # N_>k = sum_i_to_end of N_i
-        arr[idx] = ccdf
-
-    dataframe['ccdf'] = arr.tolist()
-    loggified_df = statstools.get_logs_1axis(dataframe, 'ccdf')
-    plottools.plot_results(loggified_df, x + '_log', 'ccdf_log', 'CCDF for '+ title)
-    return loggified_df
-
-
 def mean_confidence_interval(data, confidence=0.95):
     a = 1.0 * numpy.array(data)
     n = len(a)
@@ -121,7 +111,9 @@ def get_name_ccdf_and_zipf_data(path, title):
     k_vs_n = kNamesAppearingNTimes.rename_axis('k').reset_index(name='N')
     k_vs_n = statstools.get_logs_2axes(k_vs_n, 'k', 'N')
     k_vs_n = k_vs_n.sort_values(by=['k'])
-    ccdfed = ccdf(k_vs_n, 'k', 'N', title)
+    ccdfed = ccdf(k_vs_n, 'N')
+    statstools.get_logs_1axis(ccdfed, 'ccdf')
+    plottools.plot_results(ccdfed, 'k_log', 'ccdf_log', 'CCDF: ' + title)
 
     dataframe = statstools.get_logs_1axis(dataframe, 'Frequency')
     zipfed = zipf(dataframe, 'Frequency', title)
@@ -159,25 +151,25 @@ def compare_gammas_to_alphas(gammas, alphas, title):
 Q3_Q4_Q5()
 title = 'Girl''s names in 1952'
 g1952 = get_name_ccdf_and_zipf_data('Data/names-girls1952.csv', title)
-ccdffit = get_and_plot_fit_for_threshold(g1952[0], 'k_log', 'N_log', title, 1.88)
-zipffit = get_and_plot_fit_for_threshold(g1952[1], 'rank', 'Frequency', title, 1.2)
+ccdffit = get_and_plot_fit_for_threshold(g1952[0], 'k_log', 'N_log', "CCDF: " + title, 4.2)
+zipffit = get_and_plot_fit_for_threshold(g1952[1], 'rank_log', 'Frequency_log', "Zipf: " + title, 1.25)
 compare_gammas_to_alphas(ccdffit, zipffit, title)
 
 title = 'Boy''s names in 1952'
 b1952 = get_name_ccdf_and_zipf_data('Data/names-boys1952.csv', title)
-ccdffit = get_and_plot_fit_for_threshold(b1952[0], 'k_log', 'N_log', title, 1.9)
-zipffit = get_and_plot_fit_for_threshold(b1952[1], 'rank', 'Frequency', title, 1.2)
+ccdffit = get_and_plot_fit_for_threshold(b1952[0], 'k_log', 'N_log', title, 4.2)
+zipffit = get_and_plot_fit_for_threshold(b1952[1], 'rank_log', 'Frequency_log', title, 1)
 compare_gammas_to_alphas(ccdffit, zipffit, title)
 
 title = 'Girl''s names in 2002'
 g2002 = get_name_ccdf_and_zipf_data('Data/names-girls2002.csv', title)
-ccdffit = get_and_plot_fit_for_threshold(g2002[0], 'k_log', 'N_log', title, 1.6)
-zipffit = get_and_plot_fit_for_threshold(g2002[1], 'rank', 'Frequency', title, 1)
+ccdffit = get_and_plot_fit_for_threshold(g2002[0], 'k_log', 'N_log', title, 3.7)
+zipffit = get_and_plot_fit_for_threshold(g2002[1], 'rank_log', 'Frequency_log', title, 1.2)
 compare_gammas_to_alphas(ccdffit, zipffit, title)
 
 title = 'Boy''s names in 2002'
 b2002 = get_name_ccdf_and_zipf_data('Data/names-boys2002.csv', title)
-ccdffit = get_and_plot_fit_for_threshold(b2002[0], 'k_log', 'N_log', title, 1.49)
-zipffit = get_and_plot_fit_for_threshold(b2002[1], 'rank', 'Frequency', title, 1.55)
-compare_gammas_to_alphas(ccdffit, zipffit)
+ccdffit = get_and_plot_fit_for_threshold(b2002[0], 'k_log', 'N_log', title, 4.2)
+zipffit = get_and_plot_fit_for_threshold(b2002[1], 'rank', 'Frequency', title, 1.3)
+compare_gammas_to_alphas(ccdffit, zipffit, title)
 

@@ -5,12 +5,11 @@ import random
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib import cm
-from IPython import display
 from time import sleep
 
 from scipy import ndimage
 
-from Monktools import ranktools
+from Monktools import ranktools, plottools
 
 
 def run_percolation(world, probability, l):
@@ -82,7 +81,8 @@ def get_and_plot_cluster_size_zipf(ax,cluster_sizes, d, max_yield, density):
     dist = ranktools.group_data(df, "size", "n_k")
     p_str = str(round(density,2)).replace(".","-")
     y_str = str(round(max_yield,2)).replace(".","-")
-    x_vals, log_nk = ranktools.plot_zipf(ax, list(dist['n_k']), 'C0', f"Zipf for cluster dist: D={d}")
+    x_vals, log_nk = ranktools.plot_zipf(ax, list(df['size']), 'C0', f"Zipf for cluster dist: D={d}")
+    slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(ax, x_vals, log_nk)
     # fig2.show(ax)
 
 
@@ -90,14 +90,15 @@ def get_and_plot_cluster_size_zipf_special(ax,cluster_sizes, density):
     df = pd.DataFrame(cluster_sizes, columns=["size"])
     dist = ranktools.group_data(df, "size", "n_k")
     x_vals, log_nk = ranktools.plot_zipf(ax, list(dist['n_k']), 'C0', f'density: {str(density)}')
+    slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(ax, x_vals, log_nk)
+
     # fig2.show(ax)
 
 
-
-L = 32  # height, width
+L = 64  # height, width
 l = L / 10
 ds = [1, 2, int(L), int(L**2)]
-# ds = [1, 2, 3, 4]
+# ds = [1, 2, 3]
 # get norm constant
 norm_denom = 0
 for i in range(L):
@@ -138,7 +139,10 @@ def first_parts():
 
         # yield curves
         df = pd.DataFrame(yields_list, columns=["d", "yield", "density"])
-        axz.scatter(df['density'], df['yield'], s=1)
+
+        p_str = str(round(max_density, 2)).replace(".", "-")
+        y_str = str(round(max_yield, 2)).replace(".", "-")
+        axz.plot(df['density'], df['yield'], label=f'D={d}, peak yield at({str(round(max_density, 2))},{str(round(max_yield, 2))})')
 
         p_str = str(round(max_density, 2)).replace(".", "-")
         y_str = str(round(max_yield, 2)).replace(".", "-")
@@ -153,10 +157,16 @@ def first_parts():
         cluster_sizes_at_peak_yield_f = cluster_sizes_at_peak_yield[filter]
 
         get_and_plot_cluster_size_zipf(ax2, cluster_sizes_at_peak_yield_f, d, max_yield, max_density)
+        ax2.legend()
+        ax2.set_title(f'Zipf distribution for dimension {d}')
         fig.savefig(f'Plots/forest_plots_dim_{d}')
         plt.clf()
 
+    axz.legend()
+    axz.set_xlabel('Forest Density')
+    axz.set_ylabel('Yield')
     fig1.savefig(f'Plots/yield_curves')
+
 
 def last_part():
 # lastly
@@ -194,4 +204,5 @@ def last_part():
     figd.savefig(f"Plots/cluster_size_zipf_L2.png")
 
 
+first_parts()
 last_part()
