@@ -86,10 +86,10 @@ def get_and_plot_cluster_size_zipf(ax,cluster_sizes, d, max_yield, density):
     # fig2.show(ax)
 
 
-def get_and_plot_cluster_size_zipf_special(ax,cluster_sizes, density):
+def get_and_plot_cluster_size_zipf_special(ax,cluster_sizes, density, color):
     df = pd.DataFrame(cluster_sizes, columns=["size"])
     dist = ranktools.group_data(df, "size", "n_k")
-    x_vals, log_nk = ranktools.plot_zipf(ax, list(dist['n_k']), 'C0', f'density: {str(density)}')
+    x_vals, log_nk = ranktools.plot_zipf(ax, list(dist['n_k']), color=color, label=f'density: {str(density)}')
     slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(ax, x_vals, log_nk)
 
     # fig2.show(ax)
@@ -168,8 +168,15 @@ def first_parts():
     fig1.savefig(f'Plots/yield_curves')
 
 
+def get_cmap(n, name='hsv'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct
+    RGB color; the keyword argument name must be a standard mpl colormap name.'''
+    return plt.cm.get_cmap(name, n)
+
+
 def last_part():
 # lastly
+    cmap = get_cmap(9)
     forest = np.zeros((L, L))
     figd, axz = plt.subplots()
     structure = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]  # define connection
@@ -181,28 +188,28 @@ def last_part():
         nonzero_cluster_sizes = cluster_sizes[filter]
 
         if round(density,2) == 0.10:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(0))
         if  round(density,2)== 0.20:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(1))
         if  round(density,2) == 0.30:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(2))
         if round(density,2) == 0.40:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(3))
         if round(density,2) == 0.50:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(4))
         if round(density,2) == 0.60:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(5))
         if round(density,2) == 0.70:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(6))
         if round(density,2) == 0.80:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(7))
         if round(density,2) == 0.90:
-            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(8))
 
     axz.legend()
     axz.set_title("Cluster size for varying densities")
     figd.savefig(f"Plots/cluster_size_zipf_L2.png")
 
 
-first_parts()
+# first_parts()
 last_part()
