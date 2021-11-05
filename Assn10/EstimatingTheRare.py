@@ -43,13 +43,38 @@ for i in range(3, 200):
     print(k)
     print(n_k)
     df = df.append({'n': n_k, 'k':k}, ignore_index=True)
+    dataframe = dataframe.append({'N': n_k, 'k':k}, ignore_index=True)
 
 # ranktools.plot_zipf(ax, list(df['n']), color='red')
 ax.scatter(np.log10(list(df['n'])), np.log10(list(df['k'])))
 slope, intercept, r, p, stderr = plottools.plot_fit(ax, np.log10(list(df['n'])), np.log10(list(df['k'])), 5, 6.8, color='purple')
-ax.set_title("fit with")
+ax.set_title("Artificial fit for google words data for N<200")
 ax.legend()
-fig2.savefig(f"Plots/google_zipf.png")
+print(f'variance: {stderr**2}')
+fig2.savefig(f"Plots/google_word_hypothetical_fit.png")
 # fit for zipf alpha = 1/(gamma-1)
 # the problem gives us gamma = −0.661
 
+
+fig3, ax3 = plt.subplots()
+slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(ax, np.log10(list(df['n'])), np.log10(list(df['k'])), 0.5, 6.8, color='blue')
+print(f'variance: {stderr**2}')
+ax3.legend()
+fig3.savefig(f"Plots/google_word_hypothetical_fit.png")
+
+# for now, estimate words that appear once as .001
+funny_guys = n_greaterthan_k(.0001) - n_greaterthan_k(1)
+total_words = n_greaterthan_k(.0001)
+
+# (i)The hypothetical fraction of words that appear once out of all words
+# (think of words as organisms or tokens here),
+fraction_appearing_once = funny_guys/ (sum(list(dataframe['N'])) + funny_guys)
+print(f"fraction appearing once: {fraction_appearing_once}")
+
+# (ii) fraction_appearing_once = funny_guys/ (sum(list(dataframe['N'])) + funny_guys)
+total_unique = (sum(list(dataframe['N'] * dataframe['k'])) + funny_guys)
+print(f"total unique words: {total_unique}")
+
+# (iii) fraction missing
+(num_199_to_2 + funny_guys) / (sum(list(dataframe['N'])) + funny_guys)
+print(f"fraction missing: {total_unique}")

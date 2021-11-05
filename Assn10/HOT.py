@@ -67,7 +67,6 @@ def get_yield(forest, spark):
     trees_in_forest = forest.cumsum()[-1]
     cost = 0
 
-    # todo: labeled forest needs to have size of cluster at each index
     for i in range(L):
         for j in range(L):
             if(labeled_forest[i, j] >0):
@@ -78,65 +77,119 @@ def get_yield(forest, spark):
     return forest_yield
 
 
-def get_and_plot_cluster_size_zipf(cluster_sizes, d, max_yield, density):
+def get_and_plot_cluster_size_zipf(ax,cluster_sizes, d, max_yield, density):
     df = pd.DataFrame(cluster_sizes, columns=["size"])
     dist = ranktools.group_data(df, "size", "n_k")
-    fig2, ax = plt.subplots()
     p_str = str(round(density,2)).replace(".","-")
     y_str = str(round(max_yield,2)).replace(".","-")
-    x_vals, log_nk = ranktools.plot_zipf(ax, list(dist['n_k']), 'C0', f"Yield curve D={d} - peak yield at ({p_str},{p_str})")
+    x_vals, log_nk = ranktools.plot_zipf(ax, list(dist['n_k']), 'C0', f"Zipf for cluster dist: D={d}")
     # fig2.show(ax)
-    fig2.savefig(f"Plots/cluster_size_zipf_{str(d)}_yield_{y_str}.png")
+
+
+def get_and_plot_cluster_size_zipf_special(ax,cluster_sizes, density):
+    df = pd.DataFrame(cluster_sizes, columns=["size"])
+    dist = ranktools.group_data(df, "size", "n_k")
+    x_vals, log_nk = ranktools.plot_zipf(ax, list(dist['n_k']), 'C0', f'density: {str(density)}')
+    # fig2.show(ax)
 
 
 
 L = 32  # height, width
 l = L / 10
 ds = [1, 2, int(L), int(L**2)]
+# ds = [1, 2, 3, 4]
 # get norm constant
 norm_denom = 0
 for i in range(L):
     for j in range(L):
         norm_denom += (math.e**(-i/l) * math.e**(-j/l))
 
-
-# initial conditions of zero
 spark_dist = np.zeros((L, L))
 spark_dist = calculate_spark_distribution(spark_dist)
-for d in ds:
+
+def first_parts():
+    # initial conditions of zero
+    fig1, axz = plt.subplots()
+    for d in ds:
+        forest = np.zeros((L, L))
+        yields_list = list() # this is to track the yield of the chosen spot for each d
+        max_yield = 0 # this is to keep watch for an optimal matrix
+        forest_with_max_yield = np.zeros((L,L)) # this is the matrix having max_yield
+        max_density = 0
+        if d == 1:
+            forest = run_percolation(forest, 0.5, L)
+            max_density = (forest.cumsum()[-1]/(L*L*1.00))
+            forest_with_max_yield = forest
+            max_yield = get_yield(forest_with_max_yield, spark_dist)
+        else:
+            for i in range(L*L):
+                forest, forest_yield, density = get_spot_with_max_yield_for_d(forest, spark_dist, d)
+                yields_list.append([d, forest_yield, forest.cumsum()[-1]/(L*L*1.00)])
+                # this forest is pretty cool, set it as the maximum
+                if forest_yield > max_yield:
+                    max_yield = forest_yield
+                    forest_with_max_yield = forest
+                    max_density = density
+
+        # plots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 7))
+        ax1.set_title(f"Optimal forest for D={d} and L={L}")
+        ax1.imshow(forest_with_max_yield, cmap=plt.get_cmap(cm.bone), origin='lower')
+
+        # yield curves
+        df = pd.DataFrame(yields_list, columns=["d", "yield", "density"])
+        axz.scatter(df['density'], df['yield'], s=1)
+
+        p_str = str(round(max_density, 2)).replace(".", "-")
+        y_str = str(round(max_yield, 2)).replace(".", "-")
+        print(f"Yield curve D={d} - peak yield at ({p_str},{y_str})")
+
+        # zipf
+        structure = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]  # define connection
+        labeled_forest, nb_labels = ndimage.label(forest_with_max_yield, structure)  # label clusters
+        cluster_sizes_at_peak_yield = ndimage.sum(forest_with_max_yield, labeled_forest, range(nb_labels + 1))
+        filter = cluster_sizes_at_peak_yield > 0
+
+        cluster_sizes_at_peak_yield_f = cluster_sizes_at_peak_yield[filter]
+
+        get_and_plot_cluster_size_zipf(ax2, cluster_sizes_at_peak_yield_f, d, max_yield, max_density)
+        fig.savefig(f'Plots/forest_plots_dim_{d}')
+        plt.clf()
+
+    fig1.savefig(f'Plots/yield_curves')
+
+def last_part():
+# lastly
     forest = np.zeros((L, L))
-    yields_list = list() # this is to track the yield of the chosen spot for each d
-    max_yield = 0 # this is to keep watch for an optimal matrix
-    forest_with_max_yield = np.zeros((L,L)) # this is the matrix having max_yield
-    max_density = 0
-    if d == 1:
-        forest = run_percolation(forest, 0.5, L)
-        max_density = (forest.cumsum()[-1]/(L*L*1.00))
-        forest_with_max_yield = forest
-        max_yield = get_yield(forest_with_max_yield, spark_dist)
-    else:
-        for i in range(L*L):
-            forest, forest_yield, density = get_spot_with_max_yield_for_d(forest, spark_dist, d)
-            yields_list.append([d, forest_yield, forest.cumsum()[-1]/(L*L*1.00)])
-            # this forest is pretty cool, set it as the maximum
-            if forest_yield > max_yield:
-                max_yield = forest_yield
-                forest_with_max_yield = forest
-                max_density = density
-
-    # plots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 7))
-    ax1.imshow(forest_with_max_yield, cmap=plt.get_cmap(cm.bone), origin='lower')
-
+    figd, axz = plt.subplots()
     structure = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]  # define connection
-    labeled_forest, nb_labels = ndimage.label(forest_with_max_yield, structure)  # label clusters
-    cluster_sizes_at_peak_yield = ndimage.sum(forest_with_max_yield, labeled_forest, range(nb_labels + 1))
-    filter = cluster_sizes_at_peak_yield > 0
-    cluster_sizes_at_peak_yield_f = cluster_sizes_at_peak_yield[filter]
-    df = pd.DataFrame(yields_list, columns=["d", "yield", "density"])
-    ax2.scatter(df['density'], df['yield'])
-    fig.savefig(f'Plots/forest_plots_dim_{d}')
-    plt.clf()
-    get_and_plot_cluster_size_zipf(cluster_sizes_at_peak_yield_f, d, max_yield, max_density)
+    for i in range(L * L):
+        forest, forest_yield, density = get_spot_with_max_yield_for_d(forest, spark_dist, L**2)
+        labeled_forest, nb_labels = ndimage.label(forest, structure)  # label clusters
+        cluster_sizes = ndimage.sum(forest, labeled_forest, range(nb_labels + 1))
+        filter = cluster_sizes > 0
+        nonzero_cluster_sizes = cluster_sizes[filter]
+
+        if round(density,2) == 0.10:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+        if  round(density,2)== 0.20:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+        if  round(density,2) == 0.30:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+        if round(density,2) == 0.40:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+        if round(density,2) == 0.50:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+        if round(density,2) == 0.60:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+        if round(density,2) == 0.70:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+        if round(density,2) == 0.80:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+        if round(density,2) == 0.90:
+            get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density)
+
+    figd.savefig(f"Plots/cluster_size_zipf_L2.png")
 
 
+last_part()

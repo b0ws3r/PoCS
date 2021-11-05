@@ -38,7 +38,7 @@ def plot_zipf(ax: plt.Axes,
     log_nk = np.log10(np.array(nk))
     x_vals = np.log10(x_vals)
     # Then plot
-    ax.set_xlabel("N")
+    ax.set_xlabel("rank")
     ax.set_ylabel("k")
     ax.set_title(label)
     ax.scatter(x_vals, log_nk, label=label, s=1, color=color)
