@@ -90,14 +90,15 @@ def get_and_plot_cluster_size_zipf_special(ax,cluster_sizes, density, color):
     df = pd.DataFrame(cluster_sizes, columns=["size"])
     dist = ranktools.group_data(df, "size", "n_k")
     x_vals, log_nk = ranktools.plot_zipf(ax, list(dist['n_k']), color=color, label=f'density: {str(density)}')
-    slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(ax, x_vals, log_nk)
+    slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(ax, x_vals, log_nk, color=color)
 
     # fig2.show(ax)
 
 
-L = 64  # height, width
+L = 32  # height, width
 l = L / 10
 ds = [1, 2, int(L), int(L**2)]
+ds = [int(L**2)]
 # ds = [1, 2, 3]
 # get norm constant
 norm_denom = 0
@@ -179,32 +180,42 @@ def last_part():
     cmap = get_cmap(9)
     forest = np.zeros((L, L))
     figd, axz = plt.subplots()
-    structure = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]  # define connection
     for i in range(L * L):
         forest, forest_yield, density = get_spot_with_max_yield_for_d(forest, spark_dist, L**2)
-        labeled_forest, nb_labels = ndimage.label(forest, structure)  # label clusters
+        labeled_forest, nb_labels = ndimage.measurements.label(forest)  # label clusters
         cluster_sizes = ndimage.sum(forest, labeled_forest, range(nb_labels + 1))
         filter = cluster_sizes > 0
         nonzero_cluster_sizes = cluster_sizes[filter]
 
-        if round(density,2) == 0.10:
+        done = 0
+        if (i == math.floor(L*L/10.0)) & done == 0:
+            print(round(density,2))
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(0))
-        if  round(density,2)== 0.20:
+            done += 1
+        if (i == math.floor(1* L*L/10.0))& done == 1:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(1))
-        if  round(density,2) == 0.30:
+            done += 1
+        if (i == math.floor(3* L*L/10.0))& done == 2:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(2))
-        if round(density,2) == 0.40:
+            done += 1
+        if (i == math.floor(4 * L*L/10.0))& done == 3:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(3))
-        if round(density,2) == 0.50:
+            done += 1
+        if (i == math.floor(5* L*L/10.0))& done == 4:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(4))
-        if round(density,2) == 0.60:
+            done += 1
+        if (i == math.floor(6 * L*L/10.0))& done == 5:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(5))
-        if round(density,2) == 0.70:
+            done += 1
+        if (i == math.floor(7* L*L/10.0))& done == 6:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(6))
-        if round(density,2) == 0.80:
+            done += 1
+        if (i == math.floor(8*L*L/10.0)) & done == 7:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(7))
-        if round(density,2) == 0.90:
+            done += 1
+        if (i == math.floor(9*L*L/10.0))& done == 8:
             get_and_plot_cluster_size_zipf_special(axz, nonzero_cluster_sizes, density, cmap(8))
+            break
 
     axz.legend()
     axz.set_title("Cluster size for varying densities")

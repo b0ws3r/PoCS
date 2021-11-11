@@ -24,11 +24,13 @@ df['c_p_norm'] = df['c_p']/c_0
 df['l_p_norm'] = df['l_p']/l_0
 df['p_log'] = np.log10(df['p'])
 fig, ax = plt.subplots()
-ax.scatter(df['p_log'], df['c_p_norm'], marker='s')
-ax.scatter(df['p_log'], df['l_p_norm'], marker='.')
-# ax.set_xscale('log'
-x = [10**(-4), 10**(-3),10**(-2),10**(-1),1]
-ax.set_xticks(np.log10(x))
+ax.scatter(df['p_log'], df['c_p_norm'], marker='s', label='C_p/C_0')
+ax.scatter(df['p_log'], df['l_p_norm'], marker='.', label='L_p/L_0')
+
+# x = [10**(-4), 10**(-3),10**(-2),10**(-1),1]
+# ax.set_xticks(np.log10(x))
+ax.legend()
+
 # ax.xaxis.set_major_locator(ticker.FixedLocator(x))
 
 fig.savefig('Plots/WattsStrogatz.png')
