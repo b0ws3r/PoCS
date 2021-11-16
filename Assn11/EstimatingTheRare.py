@@ -12,7 +12,7 @@ all_data = pd.read_csv(path)
 
 fig2, ax = plt.subplots()
 ax.scatter(np.log10(list(all_data['k'])), np.log10(list(all_data['N'])))
-plottools.plot_fit(ax, np.log10(list(all_data['k'])), np.log10(list(all_data['N'])), 0.5, color='red')
+plottools.plot_fit(ax, np.log10(list(all_data['k'])), np.log10(list(all_data['N'])), 2, 4.5, color='red')
 
 figz, axz = plt.subplots()
 x_vals, log_nk = ranktools.plot_zipf(axz, list(all_data['N']))
@@ -58,31 +58,44 @@ ax.set_title("Artificial fit for google words data for N<200")
 # ax.legend()
 print(f'slope: {slope}')
 print(f'variance: {stderr ** 2}')
+ax.set_xlabel('log10(k)')
+ax.set_ylabel('log10(N)')
+ax.legend()
 fig2.savefig(f"Plots/google_word_hypothetical_fit.png")
 # fit for zipf alpha = 1/(gamma-1)
 # the problem gives us gamma = −0.661
 
-
-# the wholeee fit
-fig3, ax3 = plt.subplots()
-slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(ax, np.log10(list(artificial_data['n'])),
-                                                                        np.log10(list(artificial_data['k'])), 0.5, 6.8,
-                                                                        color='blue')
-print(f'slope: {slope_new}')
-print(f'variance: {stderr_new ** 2}')
-# ax3.legend()
-fig3.savefig(f"Plots/google_word_hypothetical_combined_fit.png")
-
 # for now, estimate words that appear once as .001
-funny_guys = n_greaterthan_k(.000001) - (calc + known_num_words_to_200)
-total_words = (sum(list(all_data['N'] * all_data['k'])) + funny_guys)
+# funny_guys = 10**(intercept + slope*1)
+funny_guys = 10**(intercept)
+all_data = all_data.append({'N': funny_guys, 'k': 1}, ignore_index=True)
+
+total_words = (sum(list(all_data['N'] * all_data['k'])))
 
 
 # (i)The hypothetical fraction of words that appear once out of all words
 # (think of words as organisms or tokens here),
 fraction_appearing_once = funny_guys / total_words
-print(f"total unique words in dataset: {total_words}")
+print(f"total unique words in dataset: {funny_guys}")
 print(f"fraction appearing once: {fraction_appearing_once}")
+
+avg = np.sum(all_data['N'] * all_data['k']) / np.sum(all_data['N'])
+variance = np.sum((all_data['N'] * (all_data['k'] - avg) ** 2)) / np.sum(all_data['N'])
+print('avg: ' + str(avg))
+print('sigma: ' + str(np.sqrt(variance)))
+
+
+# the wholeee fit
+fig3, ax3 = plt.subplots()
+ax3.scatter(np.log10(list(all_data['k'])), np.log10(list(all_data['N'])))
+slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(ax3, np.log10(list(all_data['k'])),
+                                                                        np.log10(list(all_data['N'])), 0.0, 4.5,
+                                                                        color='yellow')
+
+ax3.set_xlabel('log10(k)')
+ax3.set_ylabel('log10(N)')
+ax3.legend()
+fig3.savefig(f"Plots/google_word_hypothetical_combined_fit.png")
 
 # (ii) fraction_appearing_once = funny_guys/ (sum(list(dataframe['N'])) + funny_guys)
 # species/type level
@@ -91,7 +104,7 @@ fraction_appearing_once_in_google_ds = funny_guys / total_word_groups
 print(f"fraction appearing once in google's dataset: {fraction_appearing_once_in_google_ds}")
 
 # (iii) fraction missing
-num_199_to_1 = (sum(list(artificial_data['n'] * artificial_data['k'])) + funny_guys)
+num_199_to_1 = (sum(list(artificial_data['n'] * artificial_data['k']))) + funny_guys
 print(f'num from 199 to 1: {num_199_to_1}')
 fraction_missing = num_199_to_1 / total_words
 print(f"fraction missing: {fraction_missing}")

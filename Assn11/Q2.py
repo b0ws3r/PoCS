@@ -26,7 +26,7 @@ df['p_log'] = np.log10(df['p'])
 fig, ax = plt.subplots()
 ax.scatter(df['p_log'], df['c_p_norm'], marker='s', label='C_p/C_0')
 ax.scatter(df['p_log'], df['l_p_norm'], marker='.', label='L_p/L_0')
-
+ax.set_xlabel('log10(p)')
 # x = [10**(-4), 10**(-3),10**(-2),10**(-1),1]
 # ax.set_xticks(np.log10(x))
 ax.legend()
