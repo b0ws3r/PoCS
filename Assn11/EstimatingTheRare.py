@@ -11,12 +11,12 @@ path = 'Data/vocab_cs_mod.csv'
 all_data = pd.read_csv(path)
 
 fig2, ax = plt.subplots()
-ax.scatter(np.log10(list(all_data['N'])), np.log10(list(all_data['k'])))
-plottools.plot_fit(ax, np.log10(list(all_data['N'])), np.log10(list(all_data['k'])), 0.5, color='red')
+ax.scatter(np.log10(list(all_data['k'])), np.log10(list(all_data['N'])))
+plottools.plot_fit(ax, np.log10(list(all_data['k'])), np.log10(list(all_data['N'])), 0.5, color='red')
 
 figz, axz = plt.subplots()
 x_vals, log_nk = ranktools.plot_zipf(axz, list(all_data['N']))
-slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(axz, x_vals, log_nk, low_fit=0, high_fit=2, color='red')
+slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(axz, x_vals, log_nk, low_fit=2, high_fit=4.5, color='red')
 print(f'slope: {slope_new}')
 print(f'variance: {stderr_new ** 2}')
 axz.legend()
@@ -51,9 +51,9 @@ for i in range(3, 202):
 
 # ranktools.plot_zipf(ax, list(artificial_data['n']), color='red')
 
-ax.scatter(np.log10(list(artificial_data['n'])), np.log10(list(artificial_data['k'])))
-slope, intercept, r, p, stderr = plottools.plot_fit(ax, np.log10(list(artificial_data['n'])),
-                                                    np.log10(list(artificial_data['k'])), 5, 6.8, color='purple')
+ax.scatter(np.log10(list(artificial_data['k'])), np.log10(list(artificial_data['n'])))
+slope, intercept, r, p, stderr = plottools.plot_fit(ax, np.log10(list(artificial_data['k'])),
+                                                    np.log10(list(artificial_data['n'])), 0, 2, color='purple')
 ax.set_title("Artificial fit for google words data for N<200")
 # ax.legend()
 print(f'slope: {slope}')
