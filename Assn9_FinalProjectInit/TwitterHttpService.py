@@ -15,7 +15,8 @@ import unicodedata
 #To add wait time between requests
 import time
 
-
+RECENT_TWEET_SEARCH_PATH = "https://api.twitter.com/2/tweets/search/recent"
+ALL_TWEET_SEARCH_PATH = "https://api.twitter.com/2/tweets/search/all"
 def auth():
     return os.getenv('twitter-bearer')
 
@@ -26,8 +27,7 @@ def create_headers(bearer_token):
 
 
 def create_url_recent(keyword, start_date, end_date, max_results=10):
-    search_url = "https://api.twitter.com/2/tweets/search/recent"  # Change to the endpoint you want to collect data from
-
+    search_url = RECENT_TWEET_SEARCH_PATH  # Change to the endpoint you want to collect data from
     # change params based on the endpoint you are using
     query_params = {'query': keyword,
                     'start_time': start_date,
@@ -41,10 +41,8 @@ def create_url_recent(keyword, start_date, end_date, max_results=10):
     return (search_url, query_params)
 
 
-
 def create_url_all(keyword, start_date, end_date, max_results=10):
-    search_url = "https://api.twitter.com/2/tweets/search/all"  # Change to the endpoint you want to collect data from
-
+    search_url = ALL_TWEET_SEARCH_PATH # Change to the endpoint you want to collect data from
     # change params based on the endpoint you are using
     query_params = {'query': keyword,
                     'start_time': start_date,

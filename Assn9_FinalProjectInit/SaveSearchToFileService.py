@@ -1,55 +1,10 @@
-# For sending GET requests from the API
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
-import requests
-# For saving access tokens and for file management when creating and adding to the dataset
-import os
-# For dealing with json responses we receive from the API
-import json
-# For displaying the data after
-import pandas as pd
-# For saving the response data in CSV format
-import csv
-# For parsing the dates received from twitter in readable formats
-import datetime
+from datetime import datetime as d1
+from datetime import timedelta
 import dateutil.parser
-import unicodedata
-#To add wait time between requests
-import time
-from matplotlib import pyplot as plt
-
-
-from Monktools import ranktools, statstools, plottools
 from TwitterHttpService import *
+import asyncio
 
-
-def clean_word(word):
-    word.strip().strip("\"").strip()
-    word.strip('"')
-    word.replace('"', '')
-    word.replace('.', '')
-    word.replace(',', '')
-    word.replace(';', '')
-    word.replace('\'', '')
-    word.replace('!', '')
-    word.replace('?', '')
-    word.replace('*', '')
-    word.replace(')', '')
-    word.replace('(', '')
-    return word
-
-
-def clean_and_collect_words(line_of_text):
-    words = line_of_text.split(" ")
-    words = list(map(lambda w: clean_word(w), words))
-
-    return words
-
-
-def read_tweets(tweets):
-    words_in_tweets = []
-    for tweet in tweets:
-            words_in_tweets = words_in_tweets + clean_and_collect_words(tweet)
-    return words_in_tweets
+DATETIME_RFC3339_STRING = '%Y-%m-%dT%H:%M:%S.000Z'
 
 
 def send_request(url):
@@ -168,19 +123,18 @@ def append_to_csv(json_response, filename):
 
 def create_csv(filename):
     # Create file
-    csvFile = open(filename, "a", newline="", encoding='utf-8')
+    csvFile = open(filename, "w", newline="", encoding='utf-8')
     csvWriter = csv.writer(csvFile)
     # Create headers for the data you want to save, in this example, we only want save these columns in our dataset
     csvWriter.writerow(
         ['author id', 'created_at', 'geo', 'id', 'lang', 'like_count', 'quote_count', 'reply_count', 'retweet_count',
          'source', 'tweet'])
     csvFile.close()
-    # append_to_csv(json_response, csvFile.name)
 
 
-def write_tweets_to_csv(json_response):
+def write_tweets_to_csv(search_term, json_response):
     # Create file
-    csvFile = open(f"data_{search_term}.csv", "a", newline="", encoding='utf-8')
+    csvFile = open(f"{get_filename_based_on_search(search_term)} .csv", "a", newline="", encoding='utf-8')
     csvWriter = csv.writer(csvFile)
     # Create headers for the data you want to save, in this example, we only want save these columns in our dataset
     csvWriter.writerow(
@@ -190,47 +144,37 @@ def write_tweets_to_csv(json_response):
     append_to_csv(json_response, csvFile.name)
 
 
-def get_tweets_and_write_to_file(search_term, keyword, start_time, end_time, max_results):
+def get_tweets_and_write_to_file_paginated(search_term, start_time, end_time, max_results):
     # query based on parameters for recent tweets
+    keyword = f"{search_term} lang:en"
     url = create_url_recent(keyword, start_time, end_time, max_results)
-    # json_response = send_request(url)
-    # print(json.dumps(json_response, indent=4, sort_keys=True))
-    filename = f"data_{search_term}.csv"
+    filename = get_filename_based_on_search(search_term)
     create_csv(filename)
     send_request_paginated(url, filename)
+    return filename
+
+
+def get_filename_based_on_search(search_term):
+    return f"Data/data_{search_term}_{d1.now().strftime('%Y%m%dTH')}.csv"
+
+
+def send_request_and_write_to_file(search_term, start_time, end_time, max_results):
+    # query based on parameters for recent tweets
+    keyword = f"{search_term} lang:en"
+    url = create_url_recent(keyword, start_time, end_time, max_results)
+    json_response = send_request(url)
+    print(json.dumps(json_response, indent=4, sort_keys=True))
+    filename = get_filename_based_on_search(search_term)
+    create_csv(filename)
     # write results to CSV
-    # write_tweets_to_csv(json_response) # this only applies if we're not paginating
+    write_tweets_to_csv(search_term, json_response) # this only applies if we're not paginating
 
 
-# query params:
-search_term = "climate"
-keyword = f"{search_term} lang:en"
-start_time = "2021-10-23T00:00:00.000Z"
-end_time = "2021-10-27T00:00:00.000Z"
-max_results = 100
-get_tweets_and_write_to_file(search_term, keyword, start_time, end_time, max_results)
+def search_twitter_write_to_csv_async(search_term: str):
+    start_time = (d1.now() - timedelta(days=6)).strftime(DATETIME_RFC3339_STRING)
+    end_time = d1.now().strftime(DATETIME_RFC3339_STRING)
+    max_results = 100
+    filename = get_tweets_and_write_to_file_paginated(search_term, start_time, end_time, max_results)
+    return filename
 
-# now load 'tweet' column and parse out words
-df = statstools.get_dataframe(f"data_{search_term}.csv")
-tweets = df['tweet']
-twitter_words = read_tweets(tweets)
-df_raw_tweet_words = pd.DataFrame(twitter_words, columns=["word"])
-df_raw_tweet_words.to_csv(f"twitter_raw_words_search={search_term}.csv", index=False)
-
-words_with_freqs = ranktools.group_data(df_raw_tweet_words, 'word', 'k')
-n_k = ranktools.group_data(words_with_freqs, 'k', 'N')
-
-fig, ax = plt.subplots()
-x_vals, log_nk = ranktools.plot_zipf(ax, list(n_k['N']), 'C0', f'Twitter Zipf based on search term {search_term}')
-# plt.show()
-plt.savefig(f'Plots/zipf_{search_term}')
-
-# make a word cloud
-text = " ".join(words for words in df_raw_tweet_words['word'].astype(str))
-wordcloud = WordCloud(stopwords = set(STOPWORDS), max_font_size=50, max_words=100, background_color="white").generate(text)
-wordcloud.to_file("Plots/first_review.png")
-
-# all
-# url = create_url_all(keyword, start_time, end_time, max_results)
-# json_response = send_request(url)
 
