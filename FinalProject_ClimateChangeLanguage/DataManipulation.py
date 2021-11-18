@@ -1,3 +1,4 @@
+import os
 from datetime import datetime as d1
 from matplotlib import pyplot as plt
 
@@ -62,12 +63,24 @@ n_k = ranktools.group_data(words_with_freqs, 'k', 'N')
 # gather retweet data
 print(f" Most retweeted item was retweeted {max(df['retweet_count'])} times. ")
 idx = df['retweet_count'].idxmax()
-max_retweeted = df.at[idx, 'author id']
+max_retweeted = df.iat[idx]
 
 # gather retweet data
 # Save the information about the followers of most retweeted node
-request_info = FollowersToFileService.create_get_followers_request_info(max_retweeted)
+tweet_id = max_retweeted['id']
+outputDir = f'TweetNetwork_{tweet_id}'
+os.mkdir(outputDir)
+request_info = FollowersToFileService.create_get_followers_request_info(max_retweeted['author id'], outputDir)
 FollowersToFileService.send_request_paginated(request_info)
+# for each file in the output dir for that user, iterate over followers to get their followers.
+# followers_list = all followers in all files for user to string
+followers_list = list() # TODO
+for follower in followers_list:
+    # for each follower, run get_followers req.
+    FollowersToFileService.create_get_followers_request_info(follower, outputDir)
+
+# now use all files in directory as an adjacency matrix.
+# TODO
 
 
 ##########################################################################
