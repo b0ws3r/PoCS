@@ -10,6 +10,9 @@ import numpy as np
 path = 'Data/vocab_cs_mod.csv'
 all_data = pd.read_csv(path)
 
+avg = np.sum(all_data['N'] * all_data['k']) / np.sum(all_data['N'])
+variance = np.sum((all_data['N'] * (all_data['k'] - avg) ** 2)) / np.sum(all_data['N'])
+
 fig2, ax = plt.subplots()
 ax.scatter(np.log10(list(all_data['k'])), np.log10(list(all_data['N'])))
 plottools.plot_fit(ax, np.log10(list(all_data['k'])), np.log10(list(all_data['N'])), 2, 4.5, color='red')
@@ -18,8 +21,7 @@ plottools.plot_fit(ax, np.log10(list(all_data['k'])), np.log10(list(all_data['N'
 figz, axz = plt.subplots()
 x_vals, log_nk = ranktools.plot_zipf(axz, list(all_data['N']))
 slope_new, intercept_new, r_new, p_new, stderr_new = plottools.plot_fit(axz, x_vals, log_nk, low_fit=2, high_fit=4.5, color='red')
-print(f'slope: {slope_new}')
-print(f'variance: {stderr_new ** 2}')
+
 axz.legend()
 figz.savefig(f"Plots/zipfy_og.png")
 
@@ -42,8 +44,6 @@ ax.scatter(np.log10(list(artificial_data['k'])), np.log10(list(artificial_data['
 slope, intercept, r, p, stderr = plottools.plot_fit(ax, np.log10(list(artificial_data['k'])),
                                                     np.log10(list(artificial_data['n'])), 0, 2, color='purple')
 
-print(f'slope: {slope}')
-print(f'variance: {stderr ** 2}')
 ax.set_title("Artificial fit for google words data for N<200")
 ax.set_xlabel('log10(k)')
 ax.set_ylabel('log10(N)')
