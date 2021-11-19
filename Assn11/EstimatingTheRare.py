@@ -32,11 +32,10 @@ def n_greaterthan_k(k):
 
 
 artificial_data = pd.DataFrame(columns=['n', 'k'])
-for i in range(3, 202):
+for i in range(1, 200):
     # number of words occurring more than k times
-    k = 203 - i
-    if k == 200: continue
-    n_k = n_greaterthan_k(k - 1) - n_greaterthan_k(k + 1)
+    k = 200 - i
+    n_k = n_greaterthan_k(k) - n_greaterthan_k(k+1)
     artificial_data = artificial_data.append({'n': n_k, 'k': k}, ignore_index=True)
     all_data = all_data.append({'N': n_k, 'k': k}, ignore_index=True)
 
@@ -50,9 +49,8 @@ ax.set_ylabel('log10(N)')
 ax.legend()
 fig2.savefig(f"Plots/google_word_hypothetical_fit.png")
 
-
-funny_guys = 10**intercept
-all_data = all_data.append({'N': funny_guys, 'k': 1}, ignore_index=True)
+idx = artificial_data['k'].idxmin()
+funny_guys = artificial_data.at[idx, 'n']
 
 total_words = (sum(list(all_data['N'] * all_data['k'])))
 
@@ -65,7 +63,7 @@ print(f"fraction appearing once: {fraction_appearing_once}")
 avg = np.sum(all_data['N'] * all_data['k']) / np.sum(all_data['N'])
 variance = np.sum((all_data['N'] * (all_data['k'] - avg) ** 2)) / np.sum(all_data['N'])
 print('avg: ' + str(avg))
-print('sigma: ' + str(np.sqrt(variance)))
+print('variance: ' + str(variance))
 
 
 # the wholeee fit
