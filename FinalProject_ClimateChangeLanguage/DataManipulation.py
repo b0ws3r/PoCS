@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import datetime as d1
 from matplotlib import pyplot as plt
@@ -61,6 +62,9 @@ n_k = ranktools.group_data(words_with_freqs, 'k', 'N')
 
 ##########################################################################
 # gather retweet data
+with open('MichaelData/Climate Change_2021-10-01_2021-11-01.json', 'r') as f:
+    data = json.load(f)
+df = pd.DataFrame(data)
 print(f" Most retweeted item was retweeted {max(df['retweet_count'])} times. ")
 idx = df['retweet_count'].idxmax()
 max_retweeted = df.iat[idx]

@@ -12,7 +12,7 @@ class RequestInfo:
         self.query_params = {'max_results': 1000, 'user.fields': 'id'}
 
     def set_next_token(self, next_token):
-        self.set_query_param('next_token', next_token)
+        self.set_query_param('pagination_token', next_token)
 
     def set_path_param(self, key, value):
         self.path_params[key] = value
@@ -79,7 +79,7 @@ def send_request_paginated(request_info: RequestInfo):
 def append_to_csv(resp, user_id, output_dir, file_number):
     df = pd.DataFrame(resp['data'])
     df['SourceNode'] = len(resp['data']) * [user_id] # add a column so we know which user was tracked
-    df.to_csv(f'Data/{output_dir}/followers_user{user_id}_{str(file_number)}.csv', mode='a')
+    df.to_csv(f'{output_dir}/followers_user{user_id}_{str(file_number)}.csv')
 
 
 def connect_to_endpoint(url, headers, request_info: RequestInfo):
